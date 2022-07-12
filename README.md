@@ -9,7 +9,7 @@ alt="Python requirement: 3.7">
 
 ## About
 
-Web service for bloggers social network.
+A web service for social network of bloggers.
 
 Tech stack: \
 [Django 2.2.19](https://docs.djangoproject.com/en/2.2/)

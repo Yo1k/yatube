@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    {% include 'includes/head_meta.html' %}
+    <title>
+      {% block title %}Yatube: Социальная сеть блогеров{% endblock %}
+    </title>
+  </head>
+  <body>
+    {% include 'includes/header.html' %}
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+    {% include 'includes/footer.html' %}
+  </body>
+</html>
