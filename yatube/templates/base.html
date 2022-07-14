@@ -9,7 +9,10 @@
   <body>
     {% include 'includes/header.html' %}
     <main>
-      {% block content %}{% endblock %}
+      <!-- класс py-5 создает отступы сверху и снизу блока -->
+      <div class="container py-5">
+        {% block content %}{% endblock %}
+      </div>
     </main>
     {% include 'includes/footer.html' %}
   </body>
