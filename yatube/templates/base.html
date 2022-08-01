@@ -1,19 +1,53 @@
 <!DOCTYPE html>
 <html lang="ru">
   <head>
-    {% include 'includes/head_meta.html' %}
+    {% load static %}
+    <meta charset="utf-8">
+    <meta
+      content="width=device-width, initial-scale=1"
+      name="viewport">
+    <link
+      href="{% static 'img/fav/favicon.ico' %}"
+      rel="icon"
+      type="image">
+    <link
+      href="{% static 'img/fav/apple-touch-icon.png' %}"
+      rel="apple-touch-icon"
+      sizes="180x180">
+    <link
+      href="{% static 'img/fav/favicon-32x32.png' %}"
+      rel="icon"
+      sizes="32x32"
+      type="image/png">
+    <link
+      href="{% static 'img/fav/favicon-16x16.png' %}"
+      rel="icon"
+      sizes="16x16"
+      type="image/png">
+    <meta
+      content="#000"
+      name="msapplication-TileColor">
+    <meta
+      content="#ffffff"
+      name="theme-color">
+    <link
+      href="{% static 'css/bootstrap.min.css' %}"
+      rel="stylesheet">
     <title>
       {% block title %}Yatube: Социальная сеть блогеров{% endblock %}
     </title>
   </head>
   <body>
-    {% include 'includes/header.html' %}
+    {% block header %}
+      {% include 'includes/header.html' %}
+    {% endblock %}
     <main>
-      <!-- класс py-5 создает отступы сверху и снизу блока -->
       <div class="container py-5">
         {% block content %}{% endblock %}
       </div>
     </main>
-    {% include 'includes/footer.html' %}
+    {% block footer %}
+      {% include 'includes/footer.html' %}
+    {% endblock %}
   </body>
 </html>

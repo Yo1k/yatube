@@ -1,0 +1,8 @@
+{% extends 'users/base_users.html' %}
+{% block title %}Зарегистрироваться{% endblock %}
+{% block card_header %}Зарегистрироваться{% endblock %}
+{% block card_body %}
+  {% with action_url="users:signup" button_name="Зарегистрироваться" %}
+    {% include 'users/includes/auth.html' %}
+  {% endwith %}
+{% endblock %}
