@@ -33,7 +33,7 @@ Tech stack: \
 ```shell
 $ pip install -r requirements.txt
 ```
-* Change the current working derectory to `./yatube` where `manage.py` is 
+* Change the current working directory to `./yatube` where `manage.py` is 
   located and run the command:
 ```shell
 $ python3 manage.py runserver
