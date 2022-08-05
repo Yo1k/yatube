@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% block title %}
   Профайл пользователя
-  {% include 'posts/includes/fullname_or_name.html' with user=user %}
+  {% include 'posts/includes/fullname_or_name.html' with user=profile %}
 {% endblock %}
 {% block content %}
   <h1>
-    {% include 'posts/includes/fullname_or_name.html' with user=user %}
+    {% include 'posts/includes/fullname_or_name.html' with user=profile %}
   </h1>
   <h3>Всего постов: {{ page_obj.paginator.count }}</h3>
   {% for post in page_obj %}

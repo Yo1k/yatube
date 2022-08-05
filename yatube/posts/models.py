@@ -1,7 +1,5 @@
-from django.db import models
-from django.contrib import admin
 from django.contrib.auth import get_user_model
-
+from django.db import models
 
 User = get_user_model()
 
@@ -42,17 +40,3 @@ class Post(models.Model):
 
     def __str__(self):
         return self.text
-
-
-class PostAdmin(admin.ModelAdmin):
-    list_display = (
-        'pk',
-        'text',
-        'pub_date',
-        'author',
-        'group',
-    )
-    list_editable = ('group',)
-    search_fields = ('text',)
-    list_filter = ('pub_date',)
-    empty_value_display = '-пусто-'

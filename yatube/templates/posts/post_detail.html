@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}
-  {{ title }}
+  {{ post|truncatechars:30 }}
 {% endblock %}
 {% block content %}
   <div class="row">
@@ -31,7 +31,6 @@
         </li>
       </ul>
     </aside>
-
     <article class="col-12 col-md-9">
       <p>
         {{ post.text }}
@@ -39,7 +38,8 @@
       {% if request.user.is_authenticated %}
         <a
           class="btn btn-primary"
-          href="{%  url 'posts:post_edit' post.id %}">
+          href="{%  url 'posts:post_edit' post.id %}"
+        >
         редактировать запись
         </a>
       {% endif %}

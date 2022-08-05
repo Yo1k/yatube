@@ -1,18 +1,4 @@
 {% load user_filters %}
-{% if form.errors %}
-  {% for field in form %}
-    {% for error in field.errors %}
-      <div class="alert alert-danger">
-        {{ error|escape }}
-      </div>
-    {% endfor %}
-  {% endfor %}
-  {% for error in form.non_field_errors %}
-    <div class="alert alert-danger">
-      {{ error|escape }}
-    </div>
-  {% endfor %}
-{% endif %}
 <form
     method="post"
     {% if action_url %}
@@ -21,6 +7,11 @@
 >
   {% csrf_token %}
   {% for field in form %}
+    {% if field.errors %}
+      <div class="alert alert-danger">
+        {{ field.errors|escape }}
+      </div>
+    {% endif %}
     <div class="form-group row my-3"
         {% if field.field.required %}
           aria-required="true"
@@ -43,6 +34,11 @@
       </div>
     </div>
   {% endfor %}
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+      {{ form.non_field_errors|escape }}
+    </div>
+  {% endif %}
   <div class="col-md-6 offset-md-4">
     <button type="submit" class="btn btn-primary">
       {{ button_name }}
