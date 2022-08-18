@@ -1,19 +1,7 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block title %}
   {{ group.title }}
 {% endblock %}
-{% comment %}
-  I need to use this abomination (block header) to pass this test:
-  tests/test_homework.py::TestGroupView.test_group_view :197:
-  My original fragment was:
-
-  {% block content %}
-    <h1>Записи сообщества: {{ group.title }}</h1>
-    <p>{{ group.description }}</p>
-    ...
-  {% endblock %}
-
-{% endcomment %}
 {% block header %}{{ group.title }}{% endblock %}
 {% block content %}
   <p>{{ group.description }}</p>
@@ -31,7 +19,7 @@
       </li>
     </ul>
     <p>{{ post.text }}</p>
-    <a href="{% url 'posts:post_detail' post.pk %}">
+    <a href="{% url 'posts:post_detail' post.id %}">
       подробная информация
     </a>
   </article>

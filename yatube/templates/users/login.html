@@ -1,10 +1,10 @@
-{% extends 'users/base_users.html' %}
+{% extends "users/base_users.html" %}
 {% block title %}Войти{% endblock %}
 {% block card_header %}Войти на сайт{% endblock %}
 {% block card_body %}
-  {% with action_url="users:login" button_name="Войти"%}
-  {% with prompt="Забыли пароль?" reset_url="users:pswd_reset" %}
-    {% include 'users/includes/auth.html' %}
-  {% endwith %}
+  {% with action_url="users:login" button_name="Войти" %}
+    {% with prompt="Забыли пароль?" reset_url="users:pswd_reset" %}
+      {% include 'users/includes/auth.html' %}
+    {% endwith %}
   {% endwith %}
 {% endblock %}
