@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -5,10 +6,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import PostForm
 from .models import Group, Post
-
-NUM_INDEX_POST: int = 10
-NUM_GROUP_POST: int = 10
-NUM_USER_POST: int = 10
 
 
 def get_page_obj(request, object_list, per_page):
@@ -20,9 +17,9 @@ def get_page_obj(request, object_list, per_page):
 def index(request):
     title = 'Последние обновления на сайте'
     posts = (
-        Post.objects.select_related('author')
+        Post.objects.select_related('author', 'group')
     )
-    page_obj = get_page_obj(request, posts, NUM_INDEX_POST)
+    page_obj = get_page_obj(request, posts, settings.NUM_INDEX_POST)
     context = {
         'page_obj': page_obj,
         'title': title,
@@ -32,8 +29,8 @@ def index(request):
 
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    posts = group.posts.all()
-    page_obj = get_page_obj(request, posts, NUM_GROUP_POST)
+    posts = group.posts.select_related('author').all()
+    page_obj = get_page_obj(request, posts, settings.NUM_GROUP_POST)
     context = {
         'group': group,
         'page_obj': page_obj,
@@ -47,7 +44,7 @@ def profile(request, username):
         username=username
     )
     posts = user.posts.select_related('group')
-    page_obj = get_page_obj(request, posts, NUM_USER_POST)
+    page_obj = get_page_obj(request, posts, settings.NUM_USER_POST)
     context = {
         'page_obj': page_obj,
         'profile': user,
@@ -68,7 +65,7 @@ def post_detail(request, post_id):
 
 
 @login_required()
-def post_create(request):
+def create_post(request):
     form = PostForm(request.POST or None)
 
     if not form.is_valid():
@@ -82,7 +79,7 @@ def post_create(request):
 
 @login_required()
 def post_edit(request, post_id):
-    post = get_object_or_404(Post, pk=post_id)
+    post = get_object_or_404(Post, id=post_id)
     if post_id and request.user != post.author:
         return redirect('posts:post_detail', post_id=post_id)
     form = PostForm(request.POST or None, instance=post)

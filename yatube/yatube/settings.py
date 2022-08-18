@@ -25,7 +25,12 @@ SECRET_KEY = '28ga*cbwhtr3zkz&ynrdu*88xm4-6i#y=bk44elba4&6&a&!8r'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '[::1]',
+    'testserver',
+]
 
 
 # Application definition
@@ -137,3 +142,13 @@ LOGIN_REDIRECT_URL = 'posts:index'
 # Adds email driver
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+
+
+# Constants:
+# for post.views.py number posts on different url pages:
+NUM_INDEX_POST: int = 10
+NUM_GROUP_POST: int = 10
+NUM_USER_POST: int = 10
+
+# for post.models.py:
+LEN_POST_STR = 15
