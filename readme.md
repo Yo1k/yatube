@@ -19,7 +19,7 @@ can select a group from a dedicated list to which your post will belong.
 
 Tech stack: \
 [Django 2.2](https://docs.djangoproject.com/en/2.2/), 
-[Bootstrap](https://getbootstrap.com/)
+[Bootstrap 5.0](https://getbootstrap.com/)
 
 ## Running the project in developer mode
 

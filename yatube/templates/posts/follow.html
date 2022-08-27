@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load thumbnail %}
+{% block title %}
+  Последние посты интересующих авторов
+{% endblock %}
+{% block content %}
+  {% include 'posts/includes/switcher.html' with follow=True %}
+  <h1>Последние посты интересующих авторов</h1>
+  {% include 'posts/includes/post_list.html' %}
+  {% include 'posts/includes/paginator.html' %}
+{% endblock %}

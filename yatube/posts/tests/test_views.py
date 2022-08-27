@@ -1,14 +1,20 @@
+import shutil
+import tempfile
+
 from django import forms
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
+from django.test.utils import override_settings
 from django.urls import reverse
 
-from ..models import Group, Post
+from ..models import Comment, Follow, Group, Post, User
 
-User = get_user_model()
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -19,21 +25,55 @@ class PostPagesTests(TestCase):
             first_name='First_author_name',
             last_name='Last_author_name',
         )
+        cls.reader = User.objects.create_user(
+            username='Reader',
+        )
         cls.group = Group.objects.create(
             title='Test group',
             slug='test-slug',
             description='Test description',
         )
+        small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=small_gif,
+            content_type='image/gif',
+        )
         cls.post = Post.objects.create(
             text='Test post',
             author=cls.author,
             group=cls.group,
+            image=uploaded,
+        )
+        cls.comment = Comment.objects.create(
+            text='Test comment',
+            author=cls.author,
+            post=cls.post,
         )
 
         cls.guest_client = Client()
 
         cls.authorized_client_author = Client()
         cls.authorized_client_author.force_login(user=PostPagesTests.author)
+
+        cls.authorized_client_reader = Client()
+        cls.authorized_client_reader.force_login(user=PostPagesTests.reader)
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
+
+    def tearDown(self):
+        super().tearDown()
+        cache.clear()
 
     def test_pages_use_correct_template(self):
         page_names_templates = {
@@ -53,8 +93,8 @@ class PostPagesTests(TestCase):
             reverse(
                 'posts:post_edit',
                 kwargs={'post_id': PostPagesTests.post.id}
-            ): 'posts/create_post.html',
-            reverse('posts:create_post'): 'posts/create_post.html',
+            ): 'posts/post_create.html',
+            reverse('posts:post_create'): 'posts/post_create.html',
         }
         for reverse_name, template in page_names_templates.items():
             with self.subTest(reverse_name=reverse_name):
@@ -62,6 +102,22 @@ class PostPagesTests(TestCase):
                     reverse_name
                 )
                 self.assertTemplateUsed(response, template)
+
+    def test_index_page_is_cached(self):
+        new_post = Post.objects.create(
+            text='Test post caching',
+            author=PostPagesTests.author,
+        )
+        response = PostPagesTests.guest_client.get(reverse('posts:index'))
+        self.assertIn(new_post.text.encode('utf8'), response.content)
+
+        Post.objects.get(id=new_post.id).delete()
+        response = PostPagesTests.guest_client.get(reverse('posts:index'))
+        self.assertIn(new_post.text.encode('utf8'), response.content)
+
+        cache.clear()
+        response = PostPagesTests.guest_client.get(reverse('posts:index'))
+        self.assertNotIn(new_post.text.encode('utf8'), response.content)
 
     def test_index_page_shows_correct_context(self):
         response = PostPagesTests.guest_client.get(reverse('posts:index'))
@@ -93,6 +149,10 @@ class PostPagesTests(TestCase):
         self.assertEqual(
             first_post.text,
             PostPagesTests.post.text
+        )
+        self.assertEqual(
+            first_post.image,
+            PostPagesTests.post.image
         )
         self.assertEqual(
             first_post.group.slug,
@@ -142,6 +202,10 @@ class PostPagesTests(TestCase):
             PostPagesTests.post.text
         )
         self.assertEqual(
+            first_post.image,
+            PostPagesTests.post.image
+        )
+        self.assertEqual(
             first_post.group.slug,
             PostPagesTests.post.group.slug
         )
@@ -167,6 +231,10 @@ class PostPagesTests(TestCase):
             PostPagesTests.post.text
         )
         self.assertEqual(
+            first_post.image,
+            PostPagesTests.post.image
+        )
+        self.assertEqual(
             first_post.group.slug,
             PostPagesTests.post.group.slug
         )
@@ -181,6 +249,35 @@ class PostPagesTests(TestCase):
         self.assertEqual(
             profile.get_full_name(),
             PostPagesTests.post.author.get_full_name()
+        )
+
+    def check_page_with_comments_shows_correct_context(self, response):
+        form_fields = {
+            'text': forms.fields.CharField,
+        }
+        for value, expected in form_fields.items():
+            with self.subTest(value=value):
+                self.assertIn('form', response.context)
+                form_field = response.context['form'].fields[value]
+                self.assertIsInstance(form_field, expected)
+
+        self.assertIn('comments', response.context)
+        first_comment = response.context['comments'][0]
+        self.assertEqual(
+            first_comment.author.username,
+            PostPagesTests.comment.author.username
+        )
+        self.assertEqual(
+            first_comment.created,
+            PostPagesTests.comment.created
+        )
+        self.assertEqual(
+            first_comment.text,
+            PostPagesTests.comment.text
+        )
+        self.assertEqual(
+            first_comment.post,
+            PostPagesTests.post
         )
 
     def test_post_detail_page_shows_correct_context(self):
@@ -220,9 +317,14 @@ class PostPagesTests(TestCase):
             PostPagesTests.post.text
         )
         self.assertEqual(
+            post.image,
+            PostPagesTests.post.image
+        )
+        self.assertEqual(
             post.id,
             PostPagesTests.post.id
         )
+        self.check_page_with_comments_shows_correct_context(response)
 
     def check_post_is_displayed_on_first_page(
         self,
@@ -273,13 +375,13 @@ class PostPagesTests(TestCase):
             ): True,
         }
 
-        for url, is_appear in urls_with_new_post.items():
+        for url, is_displayed in urls_with_new_post.items():
             with self.subTest(url=url):
                 response = PostPagesTests.guest_client.get(url)
                 self.check_post_is_displayed_on_first_page(
                     context=response.context,
                     new_post_id=new_post.id,
-                    is_displayed=is_appear
+                    is_displayed=is_displayed
                 )
 
     def test_post_without_group_is_correctly_shown(self):
@@ -310,11 +412,12 @@ class PostPagesTests(TestCase):
 
     def test_create_post_page_shows_correct_context(self):
         response = PostPagesTests.authorized_client_author.get(
-            reverse('posts:create_post')
+            reverse('posts:post_create')
         )
         form_fields = {
             'group': forms.ModelChoiceField,
             'text': forms.fields.CharField,
+            'image': forms.fields.ImageField,
         }
         for value, expected in form_fields.items():
             with self.subTest(value=value):
@@ -332,9 +435,11 @@ class PostPagesTests(TestCase):
         form_fields = {
             'group': forms.ModelChoiceField,
             'text': forms.fields.CharField,
+            'image': forms.fields.ImageField,
         }
         for value, expected in form_fields.items():
             with self.subTest(value=value):
+                self.assertIn('form', response.context)
                 form_field = response.context['form'].fields[value]
                 self.assertIsInstance(form_field, expected)
 
@@ -344,8 +449,109 @@ class PostPagesTests(TestCase):
             PostPagesTests.post.id
         )
 
+    def test_auth_client_can_follow_other_users(self):
+        follows_count = Follow.objects.count()
+        response = PostPagesTests.authorized_client_reader.post(
+            path=reverse(
+                'posts:profile_follow',
+                kwargs={'username': PostPagesTests.author.username}
+            )
+        )
+        self.assertRedirects(
+            response,
+            reverse(
+                'posts:profile',
+                kwargs={'username': PostPagesTests.author.username}
+            )
+        )
+        self.assertEqual(
+            Follow.objects.count(),
+            follows_count + 1
+        )
+        new_follow = Follow.objects.all()[0]
+        self.assertEqual(
+            new_follow.author,
+            PostPagesTests.author
+        )
+        self.assertEqual(
+            new_follow.user,
+            PostPagesTests.reader
+        )
 
-class PaginatorViewstest(TestCase):
+    def test_auth_client_can_unfollow_other_users(self):
+        assert PostPagesTests.reader != PostPagesTests.author
+        new_follow = Follow.objects.create(
+            author=PostPagesTests.author,
+            user=PostPagesTests.reader
+        )
+        response = PostPagesTests.authorized_client_reader.post(
+            path=reverse(
+                'posts:profile_unfollow',
+                kwargs={'username': PostPagesTests.author.username}
+            )
+        )
+        self.assertRedirects(
+            response,
+            reverse(
+                'posts:profile',
+                kwargs={'username': PostPagesTests.author.username}
+            )
+        )
+        self.assertFalse(
+            Follow.objects.filter(id=new_follow.id).exists()
+        )
+
+    def test_auth_client_can_not_follow_himself(self):
+        follows_count = Follow.objects.count()
+        response = PostPagesTests.authorized_client_author.post(
+            path=reverse(
+                'posts:profile_follow',
+                kwargs={'username': PostPagesTests.author.username}
+            )
+        )
+        self.assertRedirects(
+            response,
+            reverse(
+                'posts:profile',
+                kwargs={'username': PostPagesTests.author.username}
+            )
+        )
+        self.assertEqual(
+            Follow.objects.count(),
+            follows_count
+        )
+
+    def test_follow_index_is_correctly_shown_for_followers_and_others(self):
+        Follow.objects.create(
+            user=PostPagesTests.reader,
+            author=PostPagesTests.author,
+        )
+
+        not_reader = User.objects.create_user(username='Notreader')
+        authorized_client = Client()
+        authorized_client.force_login(user=not_reader)
+
+        new_post = Post.objects.create(
+            text='New post',
+            author=PostPagesTests.author,
+        )
+
+        is_displayed_for_clients = {
+            PostPagesTests.authorized_client_reader: True,
+            authorized_client: False
+        }
+
+        for client, is_displayed in is_displayed_for_clients.items():
+            with self.subTest(client=client):
+                response = client.get(reverse('posts:follow_index'))
+                self.check_post_is_displayed_on_first_page(
+                    context=response.context,
+                    new_post_id=new_post.id,
+                    is_displayed=is_displayed
+                )
+
+
+class PaginatorViewsTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -370,22 +576,25 @@ class PaginatorViewstest(TestCase):
 
         cls.guest_client = Client()
 
+    def tearDown(self):
+        super().tearDown()
+        cache.clear()
+
     def test_first_page_contains_posts(self):
         page_names_num_posts = {
             reverse('posts:index'): settings.NUM_INDEX_POST,
             reverse(
                 'posts:group_list',
-                kwargs={'slug': PaginatorViewstest.group.slug}
+                kwargs={'slug': PaginatorViewsTest.group.slug}
             ): settings.NUM_GROUP_POST,
             reverse(
                 'posts:profile',
-                kwargs={'username': PaginatorViewstest.author.username}
+                kwargs={'username': PaginatorViewsTest.author.username}
             ): settings.NUM_USER_POST
         }
-
         for url, num_posts in page_names_num_posts.items():
             with self.subTest(url=url):
-                response = PaginatorViewstest.guest_client.get(url)
+                response = PaginatorViewsTest.guest_client.get(url)
                 self.assertEqual(
                     len(response.context['page_obj']),
                     num_posts
@@ -396,32 +605,32 @@ class PaginatorViewstest(TestCase):
             reverse('posts:index') + '?page=2': (
                 min(
                     settings.NUM_INDEX_POST,
-                    PaginatorViewstest.num - settings.NUM_INDEX_POST
+                    PaginatorViewsTest.num - settings.NUM_INDEX_POST
                 )
             ),
             reverse(
                 'posts:group_list',
-                kwargs={'slug': PaginatorViewstest.group.slug}
+                kwargs={'slug': PaginatorViewsTest.group.slug}
             ) + '?page=2': (
                 min(
                     settings.NUM_GROUP_POST,
-                    PaginatorViewstest.num - settings.NUM_GROUP_POST
+                    PaginatorViewsTest.num - settings.NUM_GROUP_POST
                 )
             ),
             reverse(
                 'posts:profile',
-                kwargs={'username': PaginatorViewstest.author.username}
+                kwargs={'username': PaginatorViewsTest.author.username}
             ) + '?page=2': (
                 min(
                     settings.NUM_USER_POST,
-                    PaginatorViewstest.num - settings.NUM_USER_POST
+                    PaginatorViewsTest.num - settings.NUM_USER_POST
                 )
             ),
         }
 
         for url, num_posts in page_names_num_posts.items():
             with self.subTest(url=url):
-                response = PaginatorViewstest.guest_client.get(url)
+                response = PaginatorViewsTest.guest_client.get(url)
                 self.assertEqual(
                     len(response.context['page_obj']),
                     num_posts

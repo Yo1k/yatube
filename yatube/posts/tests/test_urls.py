@@ -1,12 +1,10 @@
 from http import HTTPStatus
 
-from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from ..models import Group, Post
-
-User = get_user_model()
+from ..models import Group, Post, User
 
 
 class PostURLTests(TestCase):
@@ -35,8 +33,12 @@ class PostURLTests(TestCase):
         cls.authorized_client_user = Client()
         cls.authorized_client_user.force_login(user=PostURLTests.user)
 
+    def tearDown(self):
+        super().tearDown()
+        cache.clear()
+
     def test_url_exists_at_desired_location_for_guest_client(self):
-        url_guest_list = [
+        urls_for_guest = [
             reverse('posts:index'),
             reverse(
                 'posts:group_list',
@@ -52,18 +54,22 @@ class PostURLTests(TestCase):
             ),
         ]
 
-        for url in url_guest_list:
+        for url in urls_for_guest:
             with self.subTest(url=url):
-                response = self.guest_client.get(url)
+                response = PostURLTests.guest_client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_url_does_not_exist_at_desired_location_for_guest_client(self):
         response = self.guest_client.get('/unexisting_page/')
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        self.assertTemplateUsed(
+            response,
+            template_name='core/404.html'
+        )
 
     def test_url_exists_at_desired_location_for_auth_clients(self):
         response = PostURLTests.authorized_client_user.get(
-            reverse('posts:create_post')
+            reverse('posts:post_create'),
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
@@ -76,18 +82,28 @@ class PostURLTests(TestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
-    def test_create_url_redirects_anonymous_on_auth_login(self):
-        create_url = reverse('posts:create_post')
-        response = self.guest_client.get(create_url)
-        expected_url = (
-            reverse('users:login')
-            + '?next='
-            + create_url
-        )
-        self.assertRedirects(
-            response=response,
-            expected_url=expected_url
-        )
+    def test_url_redirects_anonymous_on_auth_login(self):
+        for_auth_only_urls = [
+            reverse('posts:post_create'),
+            reverse(
+                'posts:add_comment',
+                kwargs={'post_id': PostURLTests.post.id}
+            ),
+            reverse('posts:follow_index'),
+            reverse(
+                'posts:profile_follow',
+                kwargs={'username': PostURLTests.author.username}
+            ),
+            reverse(
+                'posts:profile_unfollow',
+                kwargs={'username': PostURLTests.author.username}
+            )
+        ]
+        for url in for_auth_only_urls:
+            with self.subTest(url=url):
+                response = self.guest_client.get(url)
+                expected_url = (reverse('users:login') + '?next=' + url)
+                self.assertRedirects(response, expected_url)
 
     def test_post_edit_url_redirects_anonymous_on_auth_login(self):
         post_edit_url = reverse(

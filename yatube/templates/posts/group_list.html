@@ -1,32 +1,14 @@
 {% extends "base.html" %}
+{% load thumbnail %}
 {% block title %}
   {{ group.title }}
 {% endblock %}
 {% block header %}{{ group.title }}{% endblock %}
 {% block content %}
   <p>{{ group.description }}</p>
-  {% for post in page_obj %}
-  <article>
-    <ul>
-      <li>
-        Автор: {% include 'posts/includes/fullname_or_name.html' with user=post.author %}
-        <a href="{% url 'posts:profile' post.author.username %}">
-          все посты пользователя
-        </a>
-      </li>
-      <li>
-        Дата публикации: {{ post.pub_date|date:"d E Y" }}
-      </li>
-    </ul>
-    <p>{{ post.text }}</p>
-    <a href="{% url 'posts:post_detail' post.id %}">
-      подробная информация
-    </a>
-  </article>
-  <a href="{% url 'posts:group_list' post.group.slug %}">
-    все записи группы
-  </a>
-  {% if not forloop.last %}<hr>{% endif %}
-  {% endfor %}
+  {% include 'posts/includes/post_list.html' %}
+{# SKTODO delete after tests #}
+{#  {% for post in page_obj %}#}
+{#  {% endfor %}#}
   {% include 'posts/includes/paginator.html' %}
 {% endblock %}

@@ -2,19 +2,44 @@
 {% block title %}Технологии{% endblock %}
 {% block content %}
 <div class="row">
-  <h1>Вот что я умею</h1>
+  <h1>Используемые технологии</h1>
   <aside class="col-12 col-md-3">
     <ul class="list-group list-group-flush">
       <li class="list-group-item">
-        Python
+        <a href="https://docs.python.org/3.7/">
+          Python 3.7
+        </a>
       </li>
       <li class="list-group-item">
-        Django
+        <a href="https://docs.djangoproject.com/en/2.2/">
+          Django 2.2
+        </a>
+      </li>
+      <li class="list-group-item">
+        <a href="https://getbootstrap.com/docs/5.0/getting-started/introduction/">
+          Bootstrap 5.0
+        </a>
       </li>
     </ul>
   </aside>
   <article class="col-12 col-md-9">
-    <p>Текст страницы "Технологии"</p>
+    <p>
+      Исходники этого сайта находятся
+      <a href="https://github.com/Yo1k/yatube_project">здесь</a>.
+    </p>
+    <p>
+      В данном проекте для менеджмента данных использована реляционная СУБД
+      <a href="https://www.sqlite.org/index.html">SQLite 3</a>. Для работы с
+      СУБД использовался
+      <a href="https://docs.djangoproject.com/en/2.2/topics/db/">Django's ORM</a>.
+      В качестве языка шаблонов
+      использовался
+      <a href="https://docs.djangoproject.com/en/2.2/ref/templates/language/">
+        Django template language</a>.
+      Для работы с изображениями были использованы библиотеки:
+      <a href="https://sorl-thumbnail.readthedocs.io/en/latest/">sorl-thumbnail</a> и
+      <a href="https://pillow.readthedocs.io/en/stable/releasenotes/9.2.0.html">Pillow</a>.
+    </p>
   </article>
 </div>
 {% endblock %}

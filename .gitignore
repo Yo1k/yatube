@@ -1,14 +1,19 @@
 **/.idea/
 *.swp
 *.swo
-yatube-venv*/
-harness-util/
-activate-venv.sh
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# yo1k's ignore list
+yatube-venv*/
+harness-util/
+activate-venv.sh
+.editorconfig
+.mypy.ini
+yatube/media/
 
 # C extensions
 *.so
@@ -117,9 +122,6 @@ ENV/
 env.bak/
 venv.bak/
 
-# IDE config
-.editorconfig
-
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -131,7 +133,6 @@ venv.bak/
 /site
 
 # mypy
-.mypy.ini
 .mypy_cache/
 .dmypy.json
 dmypy.json
@@ -139,8 +140,19 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Pytest checker
-pytest.ini
+# Папки, создаваемые средой разработки
+.idea
+.DS_Store
+.AppleDouble
+.LSOverride
 
-# flake8 linter
-setup.cfg
+*.sublime-project
+*.sublime-workspace
+
+.vscode/
+*.code-workspace
+
+# Local History for Visual Studio Code
+.history/
+
+.mypy_cache
