@@ -17,6 +17,13 @@ On the service, you can view all posts, posts written by a specific author
 or posts belonging to a specific group. When you create/edit a post, you 
 can select a group from a dedicated list to which your post will belong. 
 
+In addition to creating/editing posts, authorized users can follow the authors 
+they like and separately see their 
+latest posts. Authorized users can also leave comments on all posts.
+
+You can check out the service here:
+[https://yo1k.pythonanywhere.com/](https://yo1k.pythonanywhere.com/)
+
 Tech stack: \
 [Django 2.2](https://docs.djangoproject.com/en/2.2/), 
 [Bootstrap 5.0](https://getbootstrap.com/)
