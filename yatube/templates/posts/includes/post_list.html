@@ -21,7 +21,7 @@
       width="{{ im.width }}"
     >
   {% endthumbnail %}
-  <p>{{ post.text }}</p>
+  <p>{{ post.text|linebreaksbr }}</p>
   <a href="{% url 'posts:post_detail' post.id %}">
     подробная информация
   </a>

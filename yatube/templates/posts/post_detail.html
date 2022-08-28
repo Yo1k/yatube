@@ -43,7 +43,7 @@
         >
       {% endthumbnail %}
       <p>
-        {{ post.text }}
+        {{ post.text|linebreaksbr }}
       </p>
       {% if request.user.is_authenticated and request.user == post.author %}
         <a

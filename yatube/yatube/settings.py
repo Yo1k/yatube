@@ -30,6 +30,8 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '[::1]',
     'testserver',
+    'www.yo1k.pythonanywhere.com',
+    'yo1k.pythonanywhere.com',
 ]
 
 # DjDT (django-debug-toolbar) is available for IP addresses:

@@ -7,8 +7,5 @@
 {% block content %}
   <p>{{ group.description }}</p>
   {% include 'posts/includes/post_list.html' %}
-{# SKTODO delete after tests #}
-{#  {% for post in page_obj %}#}
-{#  {% endfor %}#}
   {% include 'posts/includes/paginator.html' %}
 {% endblock %}
