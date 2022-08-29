@@ -1,12 +1,12 @@
 <div class="mb-5">
   <h1>
     Все посты пользователя
-    {% include 'posts/includes/fullname_or_name.html' with user=profile %}
+    {% include 'posts/includes/fullname_or_name.html' with user=author %}
   </h1>
   <h3>Всего постов: {{ page_obj.paginator.count }}</h3>
   {% if following %}
     <form
-      action="{% url 'posts:profile_unfollow' profile.username %}"
+      action="{% url 'posts:profile_unfollow' author.username %}"
       method="post"
     >
       {% csrf_token %}
@@ -19,7 +19,7 @@
     </form>
   {% else %}
     <form
-      action="{% url 'posts:profile_follow' profile.username %}"
+      action="{% url 'posts:profile_follow' author.username %}"
       method="post"
     >
       {% csrf_token %}

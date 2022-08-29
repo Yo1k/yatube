@@ -16,12 +16,11 @@
     <img
       alt=""
       class="card-img my-2"
-      height="{{ im.height }}"
       src="{{ im.url }}"
-      width="{{ im.width }}"
+      width="100%"
     >
   {% endthumbnail %}
-  <p>{{ post.text|linebreaksbr }}</p>
+  <p class="text-break">{{ post.text|linebreaksbr }}</p>
   <a href="{% url 'posts:post_detail' post.id %}">
     подробная информация
   </a>

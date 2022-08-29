@@ -239,15 +239,15 @@ class PostPagesTests(TestCase):
             PostPagesTests.post.group.slug
         )
 
-        self.assertIn('profile', response.context)
-        profile = response.context['profile']
-        self.assertIsInstance(profile, User)
+        self.assertIn('author', response.context)
+        author = response.context['author']
+        self.assertIsInstance(author, User)
         self.assertEqual(
-            profile.username,
+            author.username,
             PostPagesTests.post.author.username
         )
         self.assertEqual(
-            profile.get_full_name(),
+            author.get_full_name(),
             PostPagesTests.post.author.get_full_name()
         )
 

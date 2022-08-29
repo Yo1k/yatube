@@ -22,7 +22,7 @@ they like and separately see their
 latest posts. Authorized users can also leave comments on all posts.
 
 You can check out the service here:
-[https://yo1k.pythonanywhere.com/](https://yo1k.pythonanywhere.com/)
+[https://yo1k.pythonanywhere.com](https://yo1k.pythonanywhere.com)
 
 Tech stack: \
 [Django 2.2](https://docs.djangoproject.com/en/2.2/), 

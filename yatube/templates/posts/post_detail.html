@@ -37,12 +37,11 @@
         <img
           alt=""
           class="card-img my-2"
-          height="{{ im.height }}"
           src="{{ im.url }}"
-          width="{{ im.width }}"
+          width="100%"
         >
       {% endthumbnail %}
-      <p>
+      <p class="text-break">
         {{ post.text|linebreaksbr }}
       </p>
       {% if request.user.is_authenticated and request.user == post.author %}

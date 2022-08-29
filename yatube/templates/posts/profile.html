@@ -2,10 +2,10 @@
 {% load thumbnail %}
 {% block title %}
   Профайл пользователя
-  {% include 'posts/includes/fullname_or_name.html' with user=profile %}
+  {% include 'posts/includes/fullname_or_name.html' with user=author %}
 {% endblock %}
 {% block content %}
-  {% if request.user != profile %}
+  {% if request.user != author %}
     {% include 'posts/includes/follow_button.html' %}
   {% endif %}
   {% include 'posts/includes/post_list.html' %}

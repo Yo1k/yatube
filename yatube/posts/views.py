@@ -131,7 +131,7 @@ def profile(request, username):
     context = {
         'following': following,
         'page_obj': page_obj,
-        'profile': author,
+        'author': author,
     }
     return render(request, 'posts/profile.html', context)
 
